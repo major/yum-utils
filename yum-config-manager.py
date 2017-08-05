@@ -27,7 +27,7 @@ def sanitize_url_to_fs(url):
     Strips dangerous and common characters to create a filename we
     can use to store the cache in.
     """
-    
+
     # code taken and modified from planet venus code base:
     # http://intertwingly.net/code/venus/LICENCE
 
@@ -139,7 +139,7 @@ if opts.save or opts.enable or opts.disable or opts.addrepo:
     if yb.conf.uid != 0:
         logger.error("You must be root to change the yum configuration.")
         sys.exit(50)
-        
+
 args = set(yb.cmds)
 
 if opts.enable and opts.disable:
@@ -192,12 +192,13 @@ if hasattr(yb, 'repo_setopts') and yb.repo_setopts:
 
 if not opts.addrepo:
     for repo in sorted(repos):
-        print yb.fmtSection('repo: ' + repo.id)
         if opts.enable and not repo.enabled:
             repo.enable()
         elif opts.disable and repo.enabled:
             repo.disable()
-        print repo.dump()
+        if not opts.quiet:
+            print yb.fmtSection('repo: ' + repo.id)
+            print repo.dump()
         if (opts.save and
             (only or (hasattr(yb, 'repo_setopts') and match_repoid(repo.id, yb.repo_setopts)))):
             writeRawConfigFile(repo.repofile, repo.id, repo.yumvar,
@@ -211,11 +212,11 @@ if opts.addrepo:
         if os.path.exists(rdir): # take the first one that exists
             myrepodir = rdir
             break
-    
+
     if not myrepodir:
         myrepodir = yb.conf.reposdir[0]
         os.makedirs(myrepodir)
-        
+
     for url in opts.addrepo:
         print 'adding repo from: %s' % url
         if url.endswith('.repo'): # this is a .repo file - fetch it, put it in our reposdir and enable it
@@ -236,7 +237,7 @@ if opts.addrepo:
                 continue
             else:
                 print 'repo saved to %s' % result
-            
+
         else:
             repoid = sanitize_url_to_fs(url)
             reponame = 'added from: %s' % url
@@ -257,6 +258,6 @@ if opts.addrepo:
                 continue
             else:
                 fo.close()
-                
-            
+
+
 
